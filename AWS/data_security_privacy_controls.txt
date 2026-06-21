@@ -1,0 +1,52 @@
+1. Protecting AI Environments using Network Isolation
+- Network Risks for AI workloads
+-> AI API calls are sensitive by nature
+-> Default routing uses public endpoints
+-> Exfiltration risk is real
+- VPC Endpoints and AWS PrivateLink
+-> Enables private connectivity to AWS services without using public IP addresses or 
+   public internet routing
+-> Therefore uses:
+   - Interface VPC endpoints via AWS PrivateLink
+   - Gateway endpoints for S3 and DynamoDB
+   - Security groups on interface VPC endpoints
+- Keeping AI Traffic off the public internet (we want to protect the resources that AI access)
+-> Dedicated VPC for AI workloads
+-> Private subnets only
+-> Minimize or tightly control outbound internet paths
+-> Strict egress rules
+
+2. Protecting AI Environments with IAM
+- IAM threats against AI!
+  A compromised identity with broad Bedrock access is a direct path to unauthorized model 
+  invocation and data exposure 
+- restrict the bedrock actions for the IAM role
+- fine grained Bedrock permissions
+- avoid broad service-level permissions
+- separate roles per functions: developer vs functions
+- implicit deny and explicit allow
+- IAM condition keys for Access Context
+  Condition keys add context requirements by enforcing the context in which access is permitted
+  This includes condition on:
+  - Source VPC endpoints
+  - Regions
+  - Tags 
+  - Encryption (requires KMS enabled)
+- Workflow:
+  IAM -> Principal (Role) -> IAM Condition Key -> Guardrails -> Model
+  
+3. Data Governance with Lake Formation
+- Ai pipelines depend on sensitive datasets
+- S3 bucket policies control access at the bucket or prefix level, but cannot restrict access
+  to specific columns, rows or cells within a dataset
+- The IAM service controls who can call an API but cannot filter which rows or columns a 
+  query returns
+- So solution: AWS Lake Formation (fills data governance gap)
+- What is it? Lake Formation is a managed service purpose-built to provide fine-grained, identity-aware
+  access control over data lake resources used in AI training, retrieval and analytics
+- It achieves fine-grained access control in column and row level cells 
+- Different table views are based on identity based on who is doing the querying
+- It works through the AWS Glue Data Catalog
+- Preventing Unauthorized Exposure in AI pipelines:
+ -> The risk without data-layer governance but lake formation provides query level prevention
+    and role-aligned data access
