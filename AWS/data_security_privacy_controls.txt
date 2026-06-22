@@ -50,3 +50,79 @@
 - Preventing Unauthorized Exposure in AI pipelines:
  -> The risk without data-layer governance but lake formation provides query level prevention
     and role-aligned data access
+
+4. Monitoring and Auditing Data Access
+a. Why monitor?
+   - Preventive controls block known threats
+   - Monitoring detects what you didn't anticipate
+   - Compliance requires documented evidence
+b. AWS CloudTrail for Audit Logging 
+c. Cloudwatch logs for Centralized Visibility
+   - Send CloudTrail logs to CloudWatch logs and leverage structured decision logging
+d. Alerting on Suspicious and Anomalous Access
+  - Alerts - when a metric breaches a defined threshold; trigger notifications or automated responses
+  - Anomaly detection - monitor the expected range of a metric and alarm when actual values fall outside that range
+  - Alarm-worthy patterns - invocation freq spikes from a single identity; access at unusual hours; a service role accessing multiple model IDs in rapid sucession
+  
+5. Protecting Sensitive Data
+- Sensitive Data enters AI pipelines and systems from multiple directions
+  - User input
+  - Training Data
+  - Knowledge base content
+  - Inference logs
+- We need to secure data at rest and at motion
+- Amazon Macie (secure data at rest) - automatically discovers, classifies, and protects sensitive data stored in S3
+- Amazon Comprehend (secure data at motion) - PII detection, custom entity recognition, take actions
+- Workflow : Input Text -> Comprehend -> Lambda -> Foundation Model
+
+6. Protecting Privacy
+- Data Residency: The requirement that data be stored and processed within a specific country or geographic region to comply with local laws and org
+- Data Sovereignty: An org's or country's ability to maintain full control and ownership over their data, including where it is stored , who can access it and independence from external factors
+- Cross-region inference
+  - In-region: requests never leave the sepcified AWS region
+  - Geographic: routes within a defined geography for throughput while keeping data within regional boundaries
+  - Global: routes across all commercial regions
+- 1st layer Amazon Bedrock Native Privacy and Encryption
+  - Customer data privacy positioning
+  - Data in transit
+  - Data at rest
+  - Strong baseline for regulated workloads
+- 2nd layer Amazon Bedrock Guardrails for Privacy
+  - Apply to both inputs and outputs
+  - Sensitive info filters 
+  - Custom topic filters
+  - Denied topic examples in privacy context
+  - Consistent policy layer across supported models
+- 3rd layer Bedrock Knowledge Bases for Controlled Grounding
+  - Problem: Privacy tension in RAG (we dont want to expose the unecessary private info)
+  - Knowledge bases keep grounding data controlled
+  - Access control on the retrieval
+  - Secure storage of grounding data
+  
+7. Data Retention, Minimization, and Privacy-focused AI systems
+- Why Data Minimization and Retention Control Matter
+  - Risk -> Regulatory requirements <- Lifecycle-based retention + Privacy preservation
+- Therefore, S3 Lifecycle Policies for AI Data Retention
+- Compliance-Driven Retention Design
+  - Retention Periods
+    - raw inference inputs (prompts)
+	- model outputs
+	- evaluation and governance logs
+	- training datasets
+  - Lifecycle Policy
+    - Automated deletion is a demonstrable, auditable compliance actions
+	- Manual deletion processes are not sufficient for regulated environments
+- Data Masking with AWS Lambda:
+  - Raw Input -> Lambda (Redact, Tokenize, Pseudonymizaion) -> Foundation Model
+- Anonymization Strategies
+	-Anonymization transforms data so that re-identification is no longer feasible; masking simply covers up data
+	-Generalization replace specific values with broader catagories
+	-Perturbation adds calibrated noise to numerical values
+	-Synthetic data generalization replace real records with artificial ones so that no actual user training data is included
+- 2 Privacy concepts relevant to AI systems
+  - K-anonymity 
+    A dataset satisfies k-anonymity when every record is indistinguishable from at least k-1 other records on the quasi-identifier fields
+	Applied in AI contexts to datasets used for training or retrieval where individual-level data could otherwise be inferred
+  - Differential Privacy
+    Adds calibrated statistical noise to query request or model outputs so that the presence or absence of any individual record cannot be determined by the output
+	Applied in AI contexts when models are trained on or query sensitive aggregate data and results must not reveal individual-level information
