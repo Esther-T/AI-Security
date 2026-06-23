@@ -1,0 +1,43 @@
+1. Building Compliance Documentation with Model Cards
+a. Model Cards - structured documentation capturing a model's purpose, capabilities, limitations,
+                 and risk ratings 
+			   - Documents intended use cases training data characteristics, performance metrics, and 
+			     and known failure modes
+			   - all these offer a key governance artifact supporting audit readiness and stakeholder communication
+			   - without model card, there's no systematic record of what a model was built to do or what risks were identified before deployment
+b. SageMaker model cards - provide this feature
+c. SageMaker model Registry Integration 
+   - enables automation
+   - linked to the exact model version being promoted to production
+   - versions are immutable and prevent later modification
+   - provides full version history for audits
+   - model approval gates in the registry are visible in the card
+
+2. Data Lineage and Cataloging for Traceability
+a. Data Lineage 
+   - If an auditor asks which version of a dataset trained a specific model deployed 6 months ago and you cannot answer, you have a compliance gap
+   - Data Lineage can close this gap
+b. Why it matters?
+   - Provenance is a governance requirement
+   - Impact analysis -> with lineage perform a query to get a direct answer
+   - Reproducibility
+c. SageMaker ML Lineage Tracking (Director Acyclic Graph), AWS Glue and Glue Data Catalog can handle this
+d. Querying Path: Raw data -> Processing -> Training -> Deployed model
+
+3. Implementing Source Attributes in FM-Generated Content 
+a. Source Attribution - The practice of attaching metadata or citations to model outputs that identify the underlying data sources
+b. Metadata Tagging for Attribution
+   - Apply consistent metadata tags to resources using the TagResource API
+   - Capture alongside every output: data source, dataset version, prompt/template version, model version
+   - Understanding of tag-based access control policies 
+   - Using TagResource provides consistency across AWS services involved in your ML lifecycle
+   - Tag Policies at the org allow to enforce compliance 
+c. Citation Generation and Verification
+   - In RAG applications, link generated content back to the original retrieved source documents
+   - Citations make the evidence base visible to users and auditors
+   - Support copyright and data licensing compliance 
+   - Documented citations demostrate attribution obligations are metadata
+   - Periodic attribution audits verify completeness and accuracy
+   - Remediation workflows address attribution gaps when detected 
+   
+			  
