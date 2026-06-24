@@ -1,43 +1,127 @@
 1. Building Compliance Documentation with Model Cards
-a. Model Cards - structured documentation capturing a model's purpose, capabilities, limitations,
-                 and risk ratings 
-			   - Documents intended use cases training data characteristics, performance metrics, and 
-			     and known failure modes
-			   - all these offer a key governance artifact supporting audit readiness and stakeholder communication
-			   - without model card, there's no systematic record of what a model was built to do or what risks were identified before deployment
-b. SageMaker model cards - provide this feature
-c. SageMaker model Registry Integration 
-   - enables automation
-   - linked to the exact model version being promoted to production
-   - versions are immutable and prevent later modification
-   - provides full version history for audits
-   - model approval gates in the registry are visible in the card
+	a. Model Cards - structured documentation capturing a model's purpose, capabilities, limitations,
+					 and risk ratings 
+				   - Documents intended use cases training data characteristics, performance metrics, and 
+					 and known failure modes
+				   - all these offer a key governance artifact supporting audit readiness and stakeholder communication
+				   - without model card, there's no systematic record of what a model was built to do or what risks were identified before deployment
+	b. SageMaker model cards - provide this feature
+	c. SageMaker model Registry Integration 
+	   - enables automation
+	   - linked to the exact model version being promoted to production
+	   - versions are immutable and prevent later modification
+	   - provides full version history for audits
+	   - model approval gates in the registry are visible in the card
 
 2. Data Lineage and Cataloging for Traceability
-a. Data Lineage 
-   - If an auditor asks which version of a dataset trained a specific model deployed 6 months ago and you cannot answer, you have a compliance gap
-   - Data Lineage can close this gap
-b. Why it matters?
-   - Provenance is a governance requirement
-   - Impact analysis -> with lineage perform a query to get a direct answer
-   - Reproducibility
-c. SageMaker ML Lineage Tracking (Director Acyclic Graph), AWS Glue and Glue Data Catalog can handle this
-d. Querying Path: Raw data -> Processing -> Training -> Deployed model
+	a. Data Lineage 
+	   - If an auditor asks which version of a dataset trained a specific model deployed 6 months ago and you cannot answer, you have a compliance gap
+	   - Data Lineage can close this gap
+	b. Why it matters?
+	   - Provenance is a governance requirement
+	   - Impact analysis -> with lineage perform a query to get a direct answer
+	   - Reproducibility
+	c. SageMaker ML Lineage Tracking (Director Acyclic Graph), AWS Glue and Glue Data Catalog can handle this
+	d. Querying Path: Raw data -> Processing -> Training -> Deployed model
 
-3. Implementing Source Attributes in FM-Generated Content 
-a. Source Attribution - The practice of attaching metadata or citations to model outputs that identify the underlying data sources
-b. Metadata Tagging for Attribution
-   - Apply consistent metadata tags to resources using the TagResource API
-   - Capture alongside every output: data source, dataset version, prompt/template version, model version
-   - Understanding of tag-based access control policies 
-   - Using TagResource provides consistency across AWS services involved in your ML lifecycle
-   - Tag Policies at the org allow to enforce compliance 
-c. Citation Generation and Verification
-   - In RAG applications, link generated content back to the original retrieved source documents
-   - Citations make the evidence base visible to users and auditors
-   - Support copyright and data licensing compliance 
-   - Documented citations demostrate attribution obligations are metadata
-   - Periodic attribution audits verify completeness and accuracy
-   - Remediation workflows address attribution gaps when detected 
+	3. Implementing Source Attributes in FM-Generated Content 
+	a. Source Attribution - The practice of attaching metadata or citations to model outputs that identify the underlying data sources
+	b. Metadata Tagging for Attribution
+	   - Apply consistent metadata tags to resources using the TagResource API
+	   - Capture alongside every output: data source, dataset version, prompt/template version, model version
+	   - Understanding of tag-based access control policies 
+	   - Using TagResource provides consistency across AWS services involved in your ML lifecycle
+	   - Tag Policies at the org allow to enforce compliance 
+	c. Citation Generation and Verification
+	   - In RAG applications, link generated content back to the original retrieved source documents
+	   - Citations make the evidence base visible to users and auditors
+	   - Support copyright and data licensing compliance 
+	   - Documented citations demostrate attribution obligations are metadata
+	   - Periodic attribution audits verify completeness and accuracy
+	   - Remediation workflows address attribution gaps when detected 
+
+4. Managing Audit Logging for Model and Data Access
+   a. The role of Audit logs
+      - Governance requires evidence, not just controls
+	  - must capture:
+	    - who made that request 
+		- what operation was performed
+		- when that operation was performed
+		- where the operation was performed
+	  - when we combine these 4 aspects, we can determine why the operation was performed for compliance
+   b. AWS CloudTrail for AI workloads
+      - Logs supported Amazon Bedrock API activity
+	  - Configure custom event selectors to capture specific data events
+	  - S3 object-level operations are data events
+	  - Configure multi-region trails
+	  - Deliver logs to s3 with retention policies aligned to compliance requirements
+	  - Bedrock model invocation logging (what was in the call) is separate from cloudtrail
+   c. Athena for compliance reporting 
+      - provides large scale historical compliance analysis of API activity
+	  - SQL queries against cloudtrail logs stored in s3
+	  - Create Athena queries to analyze trail logs for compliance reporting
+
+5. Creating Organizational Governance Frameworks
+   a. Why Governance Frameworks are necessary?
+      - Without a framework, different teams apply different controls and approval thresholds leading to inconsistent coverage across the org
+   b. Multilayered governance architecture
+      - Organizations level = SCPs define max permissions and tag policies standardize metadata
+	  - Account Level - IAM policies enforce per-team and per-environment boundaries
+	  - Service Level - Resource based polcies, Bedrock Guardrails, and SageMaker configurations enforce workload-specific controls
+   c. Separation of Duties
+      - We want this, so that the permissions do not overlap
+	    - Model development - train and experiment
+		- Model evaluation - assess quality and fairness
+		- Model deployment - promote to production
+		- Model monitoring - ovserve prod behavior
+	  - Each function has a non-overlapping permissions supprted by separate accounts per env and aligned role-based access control
+   d. Responsible AI principles require technical implementation and not just policy documentation
+      - SageMaker Clarify - answers this question why did the model produced this output
+	                      - set up bias detection thresholds
+						  - create fairness assessments and explainability metrics
+						  - implement automated remediation workflows when bias violations are detected
+   e. Governance KPIs and Dashboards -> monitoring and automated reports
+      - Cloudwatch
+	  - SageMaker Model Dashboard 
+	  - Quicksight - reporting
+   f. Governance Documentation Requirements
+      - Model Cards - capture intended use, limitations, evaluation results and risk rating per model version
+	  - Evaluation reports - showcase SageMaker Clarify bias assessments and explainability metrics
+	  - Approval records - serve as documented sign-off at each promotion gate (as control points for human in the loop)
+
+6. Managing Access Governance and Guardrails at Scale
+   a. Governance at scale
+      Manual per resource governance does not scale across hundreds of models and multiple accounts, we need consistent
+	  policies regardless of team size or account count
+      - AWS Org and Service Control Policies 
+	    - Max Permissions
+		  - SCPs define the max permissions available in any AWS account
+		  - SCPs cannot be overriden by IAM policies within accounts (even by admins)
+		- AI governance SCP enforce
+		  - Approved region only
+		  - Approved foundation models only
+		  - Required tags on AI resources for supported services and policies
+		- Max permission boundary
+		  - If an action is not permitted by the SCP, no IAM policy within the account can grant it
+		  - Tag policies standardize and can enforce tagging compliance for supported services across all accounts
+		- Cross-region governance 
+		  - Implement consistent governance controls across multiple AWS regions using Organizations and SCPs combined with centralized logging
+	 - IAM Identity Center for Enterprise Federation
+	   - Connect your corporate identity provider (AD, Okta, Entra ID) via SAML 2.0
+	   - Provide SSO to multiple AWS accounts and apps 
+	   - Define the IAM permissions a user gets when they access a specific account
+	   - IAM Identity center can issue temp credentials
+  b. IAM Permission Boundaries and Tag-Based controls
+     - Permission boundaries
+	 - Tag-based access controls
+	 - Combined effect -> SCPs set the organizational max permission boundaries cap individual roles, tag-based conditions tie access to resource tagging compliance
+
+  c. So overall, the combination of quotas, tagging, and automated enforcement is what makes governace work at scale  
+	 It shifts the model from human review to automated systems, enforcing policies and flagging exceptions
+	 - Service Quota sets limits of resource consumption. This relates to num of endpoints, concurrent invocations and models that can be deployed
+	 - Resource tagging - classify every model by risk level, regulatory scope, and team ownership
+	 - Automated enforcement - Lambda/Eventbridge to detect services that are not compliant, so a model deployed without required tags can be remediated automatically or quarantined for investigation
+	  
+	  
    
 			  
