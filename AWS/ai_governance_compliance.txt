@@ -122,6 +122,55 @@
 	 - Resource tagging - classify every model by risk level, regulatory scope, and team ownership
 	 - Automated enforcement - Lambda/Eventbridge to detect services that are not compliant, so a model deployed without required tags can be remediated automatically or quarantined for investigation
 	  
-	  
-   
-			  
+7. Managing Change Control for Models
+   a. Uncontrolled model updates introduce unpredictable behavior into prod
+   b. Change control ensures that what was evaluated is what gets deployed and that every promotion decision is documented
+   c. Any change should go into a controlled workflows
+   d. AWS Step Functions can orchestrates model promotion from development through staging to production   
+   e. Lambda Automated Compliance Checks: Step Functions -> Lambda -> Pass (Human Review) or Reject (Rejection Workflow) -> if pass -> records and artifacts written in S3 and DynamoDB -> Promote to prod
+
+8. Monitoring for Misuse, Drift or Bias (after model is promoted to prod)
+   a. Models can degrade as real-world data shifts and bias can emerge after deployment even if the model passed earlier evaluations. misuse also need continous monitoring
+   b. SageMaker Model monitor
+      - Define custom baseline constraints using constraint suggestion algo
+	  - Four monitoring types: data quality, model quality, bias drift, and feature attribution drift
+	  - Generates CloudWatch alerts when metrics deviate from baseline constraints
+	  - Custom monitoring analysis code
+	  - Statistical metrics for data quality monitoring
+	  - Statistical metrics for model quality monitoring
+   c. SageMaker Clarify for Bias Drift
+      - Uses statical methods to monitor bias 
+	  - Uses Jensen-Shannon divergence to measure distance 
+	  - Pre training bias (DPL: Diff in Proportions of Labels) metrics vs post training bias (DI Disparate Impact, DCR Difference in Conditional Rejection, DPPL Difference in Positive Proportions in Predicted Labels) metrics
+      - Configurable thresholds per demographic dimension
+	  - Violations output to constraint_violations.json
+   d. CloudWatch Anomaly Detection for Misuse
+      - Invocation freq spikes from a single identity
+	  - Token consumption outside normal range
+	  - Access at unusual hours
+	  - Rapid access across multiple model IDs
+	  - Sudden increases in guardrail block rates
+
+9. Advanced Governance Enforcement and Remediation
+   a. Detection without remediation is incomplete
+      What happens if it detects something? So we need to have automated response
+   b. Guardrails as Governance Signals rather than Safety perspective
+      - Bedrock Guardrails serve as one enforcement point in a large governance systematic
+	  - When a Guardrail blocks or flags a response that event is a governance signal
+	  - Guardrail violation events are logged to CloudWatch creating a stream of policy enforcement evidence
+	  - Those logged events feed into alerting remediation workflows and audit trails
+	  - The governance question is not just did the Guardrail fire but what happened next and is there evidence?
+   c. Evidence Capture annd Response Logging
+      - Lambda can apply token-level redaction before output reaches user
+	  - Lambda can structured response logging
+	  - Those records are the audit evidence
+	  - Evidence capture is not optional
+   d. EventBridge, Lambda and Step Functions Remediation
+      - Build a pipeline to automate model rollback, feature disabling, and escalation
+	  - Everything is logged to cloudwatch and dynamoDB
+   e. Automated Testing for Ongoing Regulatory Readiness
+      - Models compliant at deployment may not remain compliant as rules change
+	  - Automated testing frameworks continuously evaluate FMs against safety, security, and compliance benchmarks
+	  - Tests triggered by: schedule cadence, model version updates, data changes or governance policy updates
+	  - Results feed into governance dashboards and compliance reporting workflows
+	  - Regulatory readiness is an ongoing operational state, not a one time deployment checkpoint
