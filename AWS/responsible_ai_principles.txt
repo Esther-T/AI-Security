@@ -35,5 +35,62 @@
 	 - Edge cases that expose model failure modes under distribution shift
 	 - Apply statistical significance testing - a poorly designed evaluation dataset produces misleading fairness results
 	 
-	 
-	
+4. Prompt Management and Prompt Flows for Fairness A/B Testing
+   a. Why prompt design affects fairness
+     - a more neutral prompt would probably produce more neutral model response vs one that might invoke/activate demographic associations in the model
+	 - Amazon Bedrock Prompt Management
+	   - Managed repo
+	   - Create multiple prompt variants
+	   - Version control
+	   - Controlled experiments
+		 - Prompt A vs B -> compare fairness scores per group/per prompt using CloudWatch dashboard
+   b. Amazon Bedrock Prompt Flows
+      - A visual pipeline builder
+	  - Build a prompt flow
+	  - Standardizes the evaluation procedure 
+	  - Enables systematic A/B testing at scale 
+	  - Evaluation outputs feed directly into CloudWatch metrics
+   c. A/B Testing Design for Fairness
+      - Stratified sampling
+	  - Power Analysis
+	  - Control confounding variables
+	  - Interaction effects
+	    - analyse whether one prompt variant performs better for some demographic groups but worse for others
+
+5. Automated Fairness Evaluations with LLM as a judge
+   a. challenge of scale because one app is prod we cannot manually review the fairness  
+      - human evaluation of fairness does not scale 
+	  - rule based evaluation misses nuanced bias 
+	  - llm as a judge scales fairness evaluation
+   b. Implementing LLM as a judge in Amazon Bedrock
+      - Use a separate foundation model as the judge 
+	  - The judge returns a score and a plain-language explanation for each response evaluated
+	  - Configure an evaluation job in Amazon Bedrock Model Evaluations with a designated judge model
+	  - Define a fairness rubric as the evaluation
+	  - Bedrock supports built-in metrics such as stereotyping and custom metrics with rating scales; pass/fail thresholds must be applied in a downstream workflow
+   c. Rubric Design and Calibration
+	  - A well defined rubric is what makes LLM as a Judge reliable
+	  - Specific and measurable criteria
+	  - Scored dimensions
+	  - Ensemble judges
+	  - Calibrate against human evaluations
+   d. Aggregate Results and Using as Regression Gates
+      - Aggregate evaluation scores across demographics
+	  - Store evaluation results in s3 for audit and historical comparison
+	  - Use evaluation outputs to feed automated fairness auditing workflows
+
+6. Developing Policy-compliant AI systems
+   a. A policy that list content requirements, restrainst means nothing if those are not implementing in the system that serves the user
+   b. Translate policy into runtime enforcement
+     - think of it as guardrails not as a safety thing but as a policy translation layer
+	 - Mapping policy requirements to guardrail configurations
+	   - each organizational Responsible AI policy requirement maps to a specific Guardrail filter
+	   - Content safety requirements -> content filter thresholds
+	   - Topic restrictions -> denied topic filters blocking responses about restricted subjects
+	   - Privacy requirements -> sensitive info filters detecting and redacting PII in inputs and outputs
+	   - Guardrails prevent harmful or biased language but it does not prove fairness
+	   - Guardrail configuration are versioned so policy changes are retained for auditing
+	 - Ensuring Guardrails are consistently attached for every invoke model API call
+
+
+	  
