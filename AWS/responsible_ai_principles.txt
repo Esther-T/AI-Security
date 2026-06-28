@@ -92,5 +92,33 @@
 	   - Guardrail configuration are versioned so policy changes are retained for auditing
 	 - Ensuring Guardrails are consistently attached for every invoke model API call
 
+7. Automated Compliance Checks and Evidence Capture
+   a. Compliance Checks Beyond Guardrails
+      Guardrails enforce known content policy rules but some compliance requirements involve business logic that Guardrails cannot express
+	  Questions to ask - these are compliance questions that require custom lambda evaluation logic
+	  - Does this financial advice response include the required regulatory disclaimer?
+	  - Does this medical response cite its sources?
+	  - Does this output meet the minimum confidence threshold defined in policy?
+   b. Pre-Inference Lambda Checks before guardrails
+      - Input schema validation
+	  - Prohibited content patterns beyond Guardrail categories
+	  - User authorization for restricted topics
+   c. Post inference Lambda checks before reaches users
+      - Required disclaimer presence for regulated domains
+	  - Citation completeness for grounded responses
+	  - Confidence threshold enforcement
+   d. Logging and Artifact Storage 
+      - CloudWatch Logs - verfict, rule evaluated, details, input hash, output hash, trace ID, timestamp
+	  - S3 provides compliant artifact long term storage
 
+8. Documenting Limitations with Model Cards and Versioned Policies
+   a. Policy Conf Versioning 
+      - Responsible AI behavior is implemented through conf that must be tracked as they evolve
+	  - When these conf changes the compliance posture of the system changes with them
+	  - Track versions of each conf type so that any output can be traced to the exact prompt, Guardrail, and rubric that were active when it was produced
+	  - Fairness evaluation results should be linked to the specific prompt or Guardrail version they tested
+   b. Continuous documentation as a compliance practice 
+      - Model cards require ongoing updates as new evaluation results arrive and new failure modes are discovered
+      - Automated workflows update model cards as evaluation results change, so keep documentation aligned with the current state of the model
+      - Audit trails that demostrate Responsible AI compliance must cover the full lifecycle	  
 	  
