@@ -1,0 +1,39 @@
+1. Transparency with Evidence and Agent Tracing
+   a. Transparency - is not about exposing internal model weights or system prompts
+                   - giving users and auditors enough info to understand why an answer was produced
+				   - without transparency users cannot verify claims and auditors cannot trace decisions
+				   - citations and evidence from grounded sources
+				   - surface citations explicitly alongside model responses and link the claim in the output back to the source document
+				   - can verify claims against original sources, and this is what makes a grounded responses
+				   - an agent, grounded response is not enough - but Bedrock Agent Tracing helps
+					 - Enable the tracing parameter in the API call to capture step by step agent execution
+					 - Trace captures: tool invocations, knowledge base retrievals, API call made, and decision points at each reasoning step
+					 - Trace data is structured and queryable for debugging, auditing, and transparency reporting
+	               - Bedrock response streaming - can generate user friendly info
+
+2. Quantifying Uncertainty with Confidence Metrics and Logging
+   a. Not all model outputs carry the same reliability
+   b. High stakes domain require explicit uncertainity signals
+   c. Without uncertainity signals there is no basis
+   d. So...
+      - Generating Confidence Indicators
+	  - Publishing Confidence Metrics to CloudWatch
+
+3. Fairness Metrics and Evaluation Datasets
+  a. What fairness means for FM evaluations?
+     - Fairness failures are not always obvious and you cannot improce what you do not measure
+  b. Core fairness metrics (choose the metric that matches the failure mode that you and your org is most concerned for your app)
+     - Fairness metrics define equal treatment
+	 - Demograpgic Parity
+	 - Disparate Impact DI
+	 - Equal Opportunity - positive cases
+	 - Equalized odds
+	 - counterfactual fairness
+  c. Building a representative evaluation datasets
+     - Include diverse demographic perspectives and underrepresented scenarios
+	 - Counterfactual test pairs use the same prompt with only demographic attribute changed, and the model's response should remain consistent
+	 - Edge cases that expose model failure modes under distribution shift
+	 - Apply statistical significance testing - a poorly designed evaluation dataset produces misleading fairness results
+	 
+	 
+	
